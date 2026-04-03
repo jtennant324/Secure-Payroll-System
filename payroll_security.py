@@ -1,9 +1,5 @@
-#Jessica Tennant
-#CIS261
-#Course Project Phase 4: Add Basic Security to the Application
-
 import os
-import hashlib
+import bcrypt
 from datetime import datetime
 
 
@@ -38,7 +34,7 @@ def add_users(file_name):
                 print("Error: Authorization code must be 'Admin' or 'User'. Please try again.")
                 continue
 
-            hashed_pw = hashlib.sha256(password.encode()).hexdigest()
+            hashed_pw = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
             file.write(f"{user_id}|{hashed_pw}|{authorization}\n")
             user_data[user_id] = {"password": password, "authorization": authorization}
             print(f"User '{user_id}' added successfully.")
@@ -221,8 +217,7 @@ def login_process(user_file, payroll_file):
             continue
 
         password = input("Enter your Password: ").strip()
-        entered_password_hashed = hashlib.sha256(password.encode()).hexdigest()
-        if user_data[user_id]["password"] != entered_password_hashed:
+        if not bcrypt.checkpw(password.encode(), user_data[user_id]["password"].encode()):
             print("Error: Incorrect password. Please try again.\n")
             continue
 
